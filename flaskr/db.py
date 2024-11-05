@@ -35,3 +35,7 @@ def init_db_command():
 sqlite3.register_converter(
     "timestamp", lambda v: datetime.fromisoformat(v.decode())
 )
+
+def init_app(app):
+   app.teardown_appcontext(close_db) # tells Flask to call `close_db` when cleaning up after returning the response
+   app.cli.add_command(init_db_command) # adds a new command that can be called with the flask command
