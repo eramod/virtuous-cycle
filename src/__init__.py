@@ -1,5 +1,5 @@
 """
-This file contains the Application Factory and tells Python that the flaskr
+This file contains the Application Factory and tells Python that the src
 directory should be treated as a package
 """
 
@@ -14,7 +14,7 @@ def create_app(test_config=None):
   app = Flask(__name__, instance_relative_config=True)
   app.config.from_mapping(
     SECRET_KEY='dev', # TODO: override with a random value in config.py before deploying b/c this is used by Flask and extensions to keep data safe
-    DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+    DATABASE=os.path.join(app.instance_path, 'src.sqlite'),
   )
 
   if test_config is None:
@@ -38,5 +38,8 @@ def create_app(test_config=None):
 
   from . import db
   db.init_app(app)
+
+  from . import auth
+  app.register_blueprint(auth.bp)
 
   return app
