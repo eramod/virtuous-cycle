@@ -1,6 +1,10 @@
 import sqlite3
 from datetime import datetime
 
+"""
+NOTE: Click is a framework for writing command line applications.
+It provides the flask command and allows adding custom management commands.
+"""
 import click
 from flask import current_app, g
 

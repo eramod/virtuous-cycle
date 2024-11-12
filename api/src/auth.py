@@ -3,12 +3,16 @@ import functools
 from flask import (
   Blueprint, flash, g, redirect, request, session, url_for
 )
+"""
+NOTE: werkzeug implements WSGI, the standard Python interface between
+applications and servers
+"""
 from werkzeug.security import check_password_hash, generate_password_hash
 from src.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/register', methods=('POST'))
+@bp.route('/register', methods=['POST'])
 def register():
   username = request.form['username']
   password = request.form['password']
@@ -39,7 +43,7 @@ def register():
   else:
     return {'error': error}
 
-@bp.route('/login', methods=('POST'))
+@bp.route('/login', methods=['POST'])
 def login():
   username = request.form['username']
   password = request.form['password']
@@ -65,7 +69,7 @@ def login():
     if error is None:
       session.clear()
       session['user_id'] = user['id']
-      return {'user_id': user['id']} 
+      return {'user_id': user['id']}
     else:
       return {'error': error}
 
