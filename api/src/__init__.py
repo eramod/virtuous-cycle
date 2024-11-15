@@ -30,11 +30,10 @@ def create_app(test_config=None):
   except OSError:
     pass
 
-  # a simple page that says hello
-  @app.route('/hello')
+  @app.route('/')
 
   def hello():
-    return "Hello World!"
+    return "Virtuous Cycle Home Page"
 
   from . import db
   db.init_app(app)
