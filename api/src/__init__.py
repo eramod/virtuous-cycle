@@ -6,12 +6,16 @@ directory should be treated as a package
 import os
 
 from flask import Flask
+from flask_cors import CORS
 
 # Application factory function. Any configuration, registration, and other setup
 # the application needs happen inside this function. It returns the app.
 def create_app(test_config=None):
   # Create and configure the app
   app = Flask(__name__, instance_relative_config=True)
+  # Sets the Access-Control-Allow-Origin header that indicates the browser should permit loading resources from localhost:5173 during development. TODO: Point this to the deployed frontend in production.
+  CORS(app, origins=['http://localhost:5173'])
+
   app.config.from_mapping(
     SECRET_KEY='dev', # TODO: override with a random value in config.py before deploying b/c this is used by Flask and extensions to keep data safe
     DATABASE=os.path.join(app.instance_path, 'src.sqlite'),
@@ -30,9 +34,10 @@ def create_app(test_config=None):
   except OSError:
     pass
 
+# TODO: This only serves as a reminder that the server is in fact running properly.
+# Remove once API is up and running.
   @app.route('/')
-
-  def hello():
+  def homepage():
     return "Virtuous Cycle Home Page"
 
   from . import db

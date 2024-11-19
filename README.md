@@ -9,7 +9,7 @@ flask --app src init-db
 
 ### Run the API server:
 ```
-flask --app src run --debug
+flask --app src run --debug --port 5001
 ```
 
 

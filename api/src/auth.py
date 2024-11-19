@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-  Blueprint, flash, g, redirect, request, session, url_for
+  Blueprint, flash, g, make_response, redirect, request, session, url_for
 )
 """
 NOTE: werkzeug implements WSGI, the standard Python interface between
@@ -14,14 +14,23 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/register', methods=['POST'])
 def register():
-  username = request.form['username']
+  email = request.form['email']
+  first_name = request.form['first_name']
+  last_name = request.form['last_name']
+  phone_number = request.form['phone_number']
   password = request.form['password']
   confirm_password = request.form['confirm_password']
   db = get_db()
   error = None
 
-  if not username:
-    error = 'Username is required'
+  if not email:
+    error = 'Email is required'
+  elif not first_name:
+    error = 'First Name is required'
+  elif not last_name:
+    error = 'Last Name is required'
+  elif not phone_number:
+    error = 'Phone number is required'
   elif not password:
     error = 'Password is required'
   elif not confirm_password:
@@ -32,33 +41,35 @@ def register():
   if error is None:
     try:
       db.execute(
-        "INSERT INTO user (username, password) VALUES (?,?)",
-        (username, generate_password_hash(password))
+        "INSERT INTO user (email, first_name, last_name, phone_number, password) VALUES (?,?,?,?,?)",
+        (email, first_name, last_name, phone_number, generate_password_hash(password))
       )
       db.commit()
     except db.IntegrityError:
-      error = f"User {username} is already registered."
+      error = f"User {email} is already registered."
     else:
-      return redirect(url_for("auth.login"))
+      # What should the backend do after it saves something to the DB?
+      # It should send a response that it worked
+      return make_response('User successfully created', 200)
   else:
     return {'error': error}
 
 @bp.route('/login', methods=['POST'])
 def login():
-  username = request.form['username']
+  email = request.form['email']
   password = request.form['password']
   db = get_db()
   error = None
 
-  if not username:
-    error = 'Username is required'
+  if not email:
+    error = 'Email is required'
   elif not password:
     error = 'Password is required'
 
   if error is None:
     user = db.execute(
-      'SELECT * FROM user WHERE username = ?',
-      (username,)
+      'SELECT * FROM user WHERE email = ?',
+      (email,)
     ).fetchone()
 
     if user is None:
