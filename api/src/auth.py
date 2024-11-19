@@ -23,6 +23,8 @@ def register():
   db = get_db()
   error = None
 
+  # TODO: Use a serializer for validation / errors.
+  # https://medium.com/@jesscsommer/how-to-serialize-and-validate-your-data-with-marshmallow-a815b2276a
   if not email:
     error = 'Email is required'
   elif not first_name:
@@ -83,6 +85,11 @@ def login():
       return {'user_id': user['id']}
     else:
       return {'error': error}
+
+@bp.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return make_response('User logged out', 200)
 
 
 
