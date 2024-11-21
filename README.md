@@ -24,8 +24,17 @@ To add all installed packages to `requirements.txt` , run
 
 
 ### API Testing
-Using built in `pytest`
+Using `pytest`
 
+### Debugging
+Python's built-in debugger:
+`import pdb; pdb.set_trace()`
+
+Within debugger:
+`n` or `next`: Execute next line
+`l` or `list`: Print 5 lines before and after where you are
+`c` or `continue`: Continue until you hit the next debugger
+`exit`: Exit the debugger
 
 
 
