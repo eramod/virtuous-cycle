@@ -13,8 +13,8 @@ CREATE TABLE user (
 CREATE TABLE quote (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   author_id INTEGER NOT NULL,
-  body TEXT NOT NULL,
-  attribution TEXT
+  content TEXT NOT NULL,
+  attribution TEXT,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (author_id) REFERENCES user (id)
 )

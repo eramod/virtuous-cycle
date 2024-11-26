@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-  Blueprint, flash, g, make_response, redirect, request, session, url_for
+  Blueprint, abort, g, make_response, request, session
 )
 """
 NOTE: werkzeug implements WSGI, the standard Python interface between
@@ -50,8 +50,6 @@ def register():
     except db.IntegrityError:
       error = f"User {email} is already registered."
     else:
-      # What should the backend do after it saves something to the DB?
-      # It should send a response that it worked
       return make_response('User successfully created', 200)
   else:
     return {'error': error}
@@ -86,11 +84,35 @@ def login():
     else:
       return {'error': error}
 
+# This `@bp.before_app_request` decorator registers a function that runs before
+# the view function, no matter what URL is requested
+@bp.before_app_request
+def load_logged_in_user():
+  user_id = session.get('user_id')
+
+  if user_id is None:
+    g.user = None
+  else:
+    g.user = get_db.execute(
+      'SELECT * FROM user WHERE id = ?', (user_id,)
+    ).fetchOne()
+
 @bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     return make_response('User logged out', 200)
 
+# Decorator to be used for resources that require a user to be logged in for access.
+def login_required(view):
+  # This decorator returns a new view function that wraps the original view it’s
+  # applied to.
+  @functools.wraps(view)
+  def wrapped_view(**kwargs):
+    if g.user is None:
+      return abort(401, 'Unauthorized. User must be logged in to access this endpoint.')
+    return view(**kwargs)
+  return wrapped_view
 
 
-# NOTE: request and session are special flask objects. It is not Pythonic to have a globally available object like request or session.
+# NOTE: request and session are special flask objects. It is not Pythonic to
+# have a globally available object like request or session.

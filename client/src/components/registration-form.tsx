@@ -38,14 +38,13 @@ export async function registerAction({request}) {
 
   const formData = await request.formData();
 
-  console.log('Form Data: ', formData)
+  console.log('Form Data: ', formData.keys().map(key => console.log(key)))
 
   try {
     const response = await fetch('http://localhost:5001/auth/register', {
       method: 'POST',
       body: formData,
     });
-    // Why is the front end erroring here when the backend sent a 200 response? It wasn't. The backend was redirecting upon success, when it should have just returned a 200 response. 
 
     if (!response.ok) {
       throw new Error('Network response was not ok');

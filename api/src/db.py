@@ -1,10 +1,8 @@
 import sqlite3
 from datetime import datetime
 
-"""
-NOTE: Click is a framework for writing command line applications.
-It provides the flask command and allows adding custom management commands.
-"""
+# NOTE: Click is a framework for writing command line applications.
+# It provides the flask command and allows adding custom management commands.
 import click
 from flask import current_app, g
 
@@ -32,7 +30,7 @@ def init_db():
 
 @click.command('init-db')
 def init_db_command():
-    """Clear the existing data and create new tables."""
+    # Clear the existing data and create new tables.
     init_db()
     click.echo('Initialized the database.')
 
