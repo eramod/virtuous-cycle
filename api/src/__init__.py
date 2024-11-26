@@ -34,16 +34,16 @@ def create_app(test_config=None):
   except OSError:
     pass
 
-# TODO: This only serves as a reminder that the server is in fact running properly.
-# Remove once API is up and running.
+  # TODO: This only serves as a reminder that the server is in fact running properly.
+  # Remove once API is up and running.
   @app.route('/')
   def homepage():
     return "Virtuous Cycle Home Page"
 
-  from . import db
+  from . import ( db, auth, quote )
   db.init_app(app)
 
-  from . import auth
   app.register_blueprint(auth.bp)
+  app.register_blueprint(quote.bp)
 
   return app
