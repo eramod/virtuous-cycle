@@ -14,9 +14,10 @@ def create_app(test_config=None):
   # Create and configure the app
   app = Flask(__name__, instance_relative_config=True)
   # Sets the Access-Control-Allow-Origin header that indicates the browser should permit loading resources from localhost:5173 during development. TODO: Point this to the deployed frontend in production.
-  CORS(app, origins=['http://localhost:5173'])
+  CORS(app, supports_credentials=True, origins=['http://localhost:5173'])
 
   app.config.from_mapping(
+    # Flask uses the SECRET_KEY to sign session cookies and ensure their integrity.
     SECRET_KEY='dev', # TODO: override with a random value in config.py before deploying b/c this is used by Flask and extensions to keep data safe
     DATABASE=os.path.join(app.instance_path, 'src.sqlite'),
   )
