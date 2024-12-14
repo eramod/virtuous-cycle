@@ -33,12 +33,8 @@ export default function RegistrationForm() {
   )
 }
 // NOTE: request is not a real request object. It is from react-router and
-// represents communication within the front end router.
 export async function registerAction({request}) {
-
   const formData = await request.formData();
-
-  console.log('Form Data: ', formData.keys().map(key => console.log(key)))
 
   try {
     const response = await fetch('http://localhost:5001/auth/register', {

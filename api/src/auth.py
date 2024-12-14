@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-  Blueprint, abort, g, make_response, request, session
+  Blueprint, abort, g, jsonify, make_response, request, session
 )
 """
 NOTE: werkzeug implements WSGI, the standard Python interface between
@@ -77,25 +77,31 @@ def login():
     elif not check_password_hash(user['password'], password):
       error = 'Password is incorrect'
 
-    if error is None:
-      session.clear()
-      session['user_id'] = user['id']
-      return {'user_id': user['id']}
-    else:
-      return {'error': error}
+    session.clear()
+    session['user_id'] = user['id']
+    # TODO: Remove
+    print("SESSION USER ID AT LOGIN: ", session['user_id'])
+
+    response = make_response(jsonify({'message': 'Login successful'}), 200)
+    return response
+
+  else:
+    return jsonify({'message': 'Invalid username or password'}), 401
 
 # This `@bp.before_app_request` decorator registers a function that runs before
-# the view function, no matter what URL is requested
+# the view function, no matter what URL is requested in this blueprint
 @bp.before_app_request
 def load_logged_in_user():
   user_id = session.get('user_id')
-
+  print("USER ID: ", user_id, "SESSION: ", session)
+  # import pdb; pdb.set_trace()
   if user_id is None:
     g.user = None
   else:
     g.user = get_db.execute(
       'SELECT * FROM user WHERE id = ?', (user_id,)
     ).fetchOne()
+    print("Session user and Global user as defined in load_logged_in_user: ", user_id, g.user)
 
 @bp.route('/logout', methods=['POST'])
 def logout():

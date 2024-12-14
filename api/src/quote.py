@@ -5,35 +5,30 @@ from werkzeug.exceptions import abort
 
 from src.auth import login_required
 from src.db import get_db
-
+# The blueprint’s name does not modify the URL, only the endpoint.
 bp = Blueprint('quote', __name__, url_prefix='/api/quotes')
 
 # GET all quotes /quotes#index
 @bp.route('/', methods=['GET'])
+# @login_required
 def index():
   db = get_db()
   quotes = db.execute(
-    'SELECT q.id, content, attribution, created, author_id, username'
+    'SELECT q.id, content, attribution, created, author_id'
     ' FROM quote q JOIN user u ON q.author_id = u.id'
     ' ORDER BY created DESC'
-  ).fetch_all()
-  return jsonify(quotes, status=200, mimetype='application/json')
+  ).fetchall()
+  return jsonify(body=quotes, status=200, mimetype='application/json') # { "quotes": quotes }
 
-# TODO: Erase. Was trying to get a make a request to create a quote.
-#  curl --request POST --header 'Content-Type: application/json' --data '{"content":"Farts", "attribution": "moi"}' http://localhost:5001/api/quotes
-
-# Make a registration request using curl and form data format. This seems to work, but does not output anything. How do I print it to the console? I've tried piping it through less and that does not work
-# curl --request 'POST' --header 'Content-Type: application/json' --data "email=mimi@moi.com", "first_name=moi", "last_name=mimi", "phone_number=5", "password=hello", "confirm_password=hello" http://localhost:5001/auth/register
-
-# curl --request 'POST' --header 'Content-Type: application/json' --data {"email": "mimi@moi.com", "first_name": "moi", "last_name": "mimi", "phone_number": "5", "password": "hello", "confirm_password": "hello"} http://localhost:5001/auth/register
-
-# CREATE a quote /quotes#post
+# CREATE a quote /api/quotes#post
 @bp.route('/', methods=['POST'])
+# @login_required
 def create():
   content = request.form['content']
   # attribution is not required. Accessing the key this way will return it if present and just not do anything otherwise.
   attribution = request.form.get('attribution')
   error = None
+  # QUESTION: The user is never set. Why? It's not being set because I haven't set up authentication with session cookie. No. The flask app is sending the correct response headers automatically on login, BUT the front end is not keeping the cookie around, and so it is not sending the correct request headers for subsequent requests. But why?
 
   if not content:
     error = 'Quote content is required'
@@ -44,13 +39,14 @@ def create():
     db.execute(
       'INSERT INTO quote (content, attribution, author_id)'
       ' VALUES (?, ?, ?)',
-      (content, attribution, g.user_id)
+      (content, attribution, g.user['id'])
     )
     db.commit()
     return make_response('Quote successfully created', 200)
 
 # GET a single quote /quotes/:id
 @bp.route('show', methods=['GET'])
+@login_required
 def show(id):
   quote = get_quote(id)
 
@@ -100,7 +96,7 @@ def delete(id):
 # logged in user.
 def get_quote(id, check_author=True):
   quote = get_db().execute(
-    'SELECT q.id, content, attribution, created, author_id, username'
+    'SELECT q.id, content, attribution, created, author_id'
     ' FROM quote q JOIN user u ON q.author_id = u.id'
     ' WHERE q.id = ?',
     (id,)
