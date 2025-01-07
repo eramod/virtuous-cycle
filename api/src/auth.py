@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-  Blueprint, abort, g, jsonify, make_response, request, session
+  Blueprint, abort, g, json, jsonify, make_response, request, session
 )
 """
 NOTE: werkzeug implements WSGI, the standard Python interface between
@@ -79,8 +79,6 @@ def login():
 
     session.clear()
     session['user_id'] = user['id']
-    # TODO: Remove
-    print("SESSION USER ID AT LOGIN: ", session['user_id'])
 
     response = make_response(jsonify({'message': 'Login successful'}), 200)
     return response
@@ -93,20 +91,44 @@ def login():
 @bp.before_app_request
 def load_logged_in_user():
   user_id = session.get('user_id')
-  print("USER ID: ", user_id, "SESSION: ", session)
-  # import pdb; pdb.set_trace()
+  db = get_db()
+
   if user_id is None:
     g.user = None
   else:
-    g.user = get_db.execute(
+    g.user = db.execute(
       'SELECT * FROM user WHERE id = ?', (user_id,)
-    ).fetchOne()
-    print("Session user and Global user as defined in load_logged_in_user: ", user_id, g.user)
+    ).fetchone()
 
 @bp.route('/logout', methods=['POST'])
 def logout():
-    session.clear()
-    return make_response('User logged out', 200)
+  session.clear()
+  return make_response(jsonify('User logged out'), 204)
+
+@bp.route('/user', methods=['GET'])
+def user():
+  user_id = session.get('user_id')
+  db = get_db()
+
+  db_user = db.execute(
+    'SELECT * FROM user WHERE id = ?', (user_id,)
+  ).fetchone()
+
+  if db_user is None:
+    return make_response(jsonify('User not found'), 404)
+  else:
+    user = {
+      'id': db_user['id'],
+      'email': db_user['email'],
+      'first_name': db_user['first_name'],
+      'last_name': db_user['last_name'],
+      'phone_number': db_user['phone_number']
+    }
+    # TODO: This converts the user object to a JSON string. Do I need to do this?
+    json_data = json.dumps(user)
+
+    return jsonify(body={'user': json_data}, status=200, mimetype='application/json')
+
 
 # Decorator to be used for resources that require a user to be logged in for access.
 def login_required(view):
