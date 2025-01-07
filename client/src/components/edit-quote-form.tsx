@@ -1,18 +1,15 @@
 import { Form, redirect } from "react-router-dom";
 import Modal from "./reusable/modal-wrapper";
 
-interface NewQuoteFormProps {
+interface EditQuoteFormProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
 }
 
-export default function NewQuoteForm({isModalOpen, setIsModalOpen}: NewQuoteFormProps) {
-  
+export default function EditQuoteForm({isModalOpen, setIsModalOpen}: EditQuoteFormProps) {
   return (
-    <Modal isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-      title="Add a Quote">
-      <Form method="post" action="new-quote-form">
+    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Edit a Quote">
+      <Form method="post" action="edit-quote-form">
         <label>
           Content:
           {/* TODO: Change this to a different type to fit more text, is it textbox? */}
@@ -27,16 +24,15 @@ export default function NewQuoteForm({isModalOpen, setIsModalOpen}: NewQuoteForm
     </Modal>
   )
 }
-// Question: Should I be using the route action to submit this form? Maybe not, since it's a modal?
 
 // NOTE: request is not a real request object. It is from react-router and
 // represents communication within the front end router.
-export async function createQuoteAction({request}) {
+export async function editQuoteAction({request}) {
   const formData = await request.formData();
 
   try {
-    const response = await fetch('http://localhost:5001/api/quotes/', {
-      method: 'POST',
+    const response = await fetch(`http://localhost:5001/api/quotes/${id}`, {
+      method: 'PUT',
       body: formData,
       credentials: 'include',
     });
@@ -44,7 +40,7 @@ export async function createQuoteAction({request}) {
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
-
+    // TODO: Update: What I really want to do is close the modal and update the quote list. Not sure how to do that.
     return redirect('/quotes');
   } catch (error) {
     // Handle error

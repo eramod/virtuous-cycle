@@ -16,6 +16,7 @@ import Quotes from './routes/quotes.tsx';
 import { registerAction } from './components/registration-form.tsx';
 import { loginAction } from './components/login-form.tsx';
 import { createQuoteAction } from './components/new-quote-form.tsx';
+import { editQuoteAction } from './components/edit-quote-form.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements (
@@ -37,8 +38,17 @@ const router = createBrowserRouter(
 
       <Route
         path="quotes"
-        element={<Quotes />}
-        action={createQuoteAction} />
+        element={<Quotes />} >
+
+        <Route
+          path="new-quote-form"
+          action={createQuoteAction} />
+
+        <Route
+          path="edit-quote-form"
+          action={editQuoteAction} />
+
+      </Route>
     </Route>
   )
 );
