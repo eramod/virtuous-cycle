@@ -22,15 +22,16 @@ export async function loginAction({request}) {
   try {
     const response = await fetch('http://localhost:5001/auth/login', {
       method: 'POST',
-      body: formData
+      credentials: 'include',
+      body: formData,
     });
 
     // Handle network errors
     if (!response.ok) {
-      throw new Error("Network response was not OK");
+      throw new Error(`Response status: ${response.status}`);
     }
 
-    // Redirect to the user's home page upon success
+    // Redirect to the home page upon success
     return redirect("/")
 
   } catch(error) {

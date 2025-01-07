@@ -4,10 +4,11 @@ import './index.css'
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  redirect,
   RouterProvider,
   Route
 } from 'react-router-dom';
-import Root from './routes/root.tsx';
+import Root, { User } from './routes/root.tsx';
 import ErrorPage from './error-page.tsx';
 import Register from './routes/register.tsx';
 import Login from './routes/login.tsx';
@@ -21,6 +22,7 @@ const router = createBrowserRouter(
     <Route
       path="/"
       element={<Root />}
+      loader={userLoader}
       errorElement={<ErrorPage />} >
 
       <Route
@@ -46,3 +48,16 @@ createRoot(document.getElementById('root')!).render(
     <RouterProvider router={router} />
   </StrictMode>,
 );
+
+async function userLoader(): Promise<User | null> {
+  const response = await fetch('http://localhost:5001/auth/user', {credentials: 'include'});
+
+  if (!response.ok) {
+    redirect('/login');
+    return null
+  }
+
+  const user = await response.json();
+
+  return user;
+}

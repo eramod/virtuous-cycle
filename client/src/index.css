@@ -78,6 +78,7 @@ nav ul {
 
 nav li {
   color: white;
+  list-style-type: none
 }
 
 nav  a {
