@@ -7,7 +7,7 @@ interface NewQuoteFormProps {
 }
 
 export default function NewQuoteForm({isModalOpen, setIsModalOpen}: NewQuoteFormProps) {
-  
+
   return (
     <Modal isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
@@ -31,7 +31,9 @@ export default function NewQuoteForm({isModalOpen, setIsModalOpen}: NewQuoteForm
 
 // NOTE: request is not a real request object. It is from react-router and
 // represents communication within the front end router.
-export async function createQuoteAction({request}) {
+import { ActionFunctionArgs } from "react-router-dom";
+
+export async function createQuoteAction({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
 
   try {

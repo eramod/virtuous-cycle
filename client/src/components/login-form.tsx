@@ -16,7 +16,9 @@ export default function LoginForm() {
   )
 }
 
-export async function loginAction({request}) {
+import { ActionFunctionArgs } from "react-router-dom";
+
+export async function loginAction({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
 
   try {

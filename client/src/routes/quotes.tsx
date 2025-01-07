@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import NewQuoteForm from "../components/new-quote-form";
-import Modal from "../components/reusable/modal-wrapper";
 
 interface Quote {
   id: string,

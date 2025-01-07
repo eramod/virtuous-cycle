@@ -27,9 +27,12 @@ export default function EditQuoteForm({isModalOpen, setIsModalOpen}: EditQuoteFo
 
 // NOTE: request is not a real request object. It is from react-router and
 // represents communication within the front end router.
-export async function editQuoteAction({request}) {
-  const formData = await request.formData();
+import { ActionFunctionArgs } from "react-router-dom";
 
+export async function editQuoteAction({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  // TODO: Update: How do I get the id of the quote I want to edit?
+  const id = 1
   try {
     const response = await fetch(`http://localhost:5001/api/quotes/${id}`, {
       method: 'PUT',

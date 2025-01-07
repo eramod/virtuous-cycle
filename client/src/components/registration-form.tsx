@@ -33,7 +33,9 @@ export default function RegistrationForm() {
   )
 }
 // NOTE: request is not a real request object. It is from react-router and
-export async function registerAction({request}) {
+import { ActionFunctionArgs } from "react-router-dom";
+
+export async function registerAction({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
 
   try {
