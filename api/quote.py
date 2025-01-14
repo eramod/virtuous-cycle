@@ -3,8 +3,8 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
-from src.auth import login_required
-from src.db import get_db
+from api.auth import login_required
+from api.db import get_db
 
 bp = Blueprint('quote', __name__, url_prefix='/api/quotes')
 

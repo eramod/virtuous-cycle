@@ -1,4 +1,4 @@
-from src import create_app
+from api import create_app
 
 # There’s not much to test about the factory itself.
 # Most of the code will be executed for each test already, so if something fails

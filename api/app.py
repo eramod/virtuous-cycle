@@ -1,5 +1,5 @@
 """
-This file contains the Application Factory and tells Python that the src
+This file contains the Application Factory and tells Python that the api
 directory should be treated as a package
 """
 
@@ -8,22 +8,21 @@ import os
 from flask import Flask
 from flask_cors import CORS
 
-# TODO: Move create_app to app.py and import it into the __init__.py file.
-# QUESTION: Why don't I have a .venv folder in my project?
-
 # Application factory function. Any configuration, registration, and other setup
 # the application needs happen inside this function. It returns the app.
 def create_app(test_config=None):
   # import pdb; pdb.set_trace()
   # Create and configure the app
   app = Flask(__name__, instance_relative_config=True)
-  # Sets the Access-Control-Allow-Origin header that indicates the browser should permit loading resources from localhost:5173 during development. TODO: Point this to the deployed frontend in production.
+
+  # TODO: Point this to the deployed frontend in production.
+  # Enable CORS (Cross-Origin Resource Sharing) for the app.
   CORS(app, supports_credentials=True, origins=['http://localhost:5173'])
 
   app.config.from_mapping(
     # Flask uses the SECRET_KEY to sign session cookies and ensure their integrity.
     SECRET_KEY='dev', # TODO: override with a random value in config.py before deploying b/c this is used by Flask and extensions to keep data safe
-    DATABASE=os.path.join(app.instance_path, 'src.sqlite'),
+    DATABASE=os.path.join(app.instance_path, 'api.sqlite'),
   )
 
   if test_config is None:

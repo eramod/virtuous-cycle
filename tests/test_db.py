@@ -1,7 +1,7 @@
 import sqlite3
 
 import pytest
-from src.db import get_db
+from api.db import get_db
 
 # Within an application context, get_db should return the same connection each
 # time it’s called.
@@ -26,7 +26,7 @@ def test_init_db_command(runner, monkeypatch):
   def fake_init_db():
     Recorder.called = True
 
-  monkeypatch.setattr('src.db.init_db', fake_init_db)
+  monkeypatch.setattr('api.db.init_db', fake_init_db)
   result = runner.invoke(args=['init-db'])
 
   assert 'Initialized' in result.output

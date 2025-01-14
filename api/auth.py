@@ -8,7 +8,7 @@ NOTE: werkzeug implements WSGI, the standard Python interface between
 applications and servers
 """
 from werkzeug.security import check_password_hash, generate_password_hash
-from src.db import get_db
+from api.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 

@@ -6,6 +6,7 @@ exceptiongroup==1.2.2
 Flask==3.0.3
 Flask-Cors==5.0.0
 future @ file:///AppleInternal/Library/BuildRoots/9dd5efe2-7fad-11ee-b588-aa530c46a9ea/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
+gunicorn==23.0.0
 importlib_metadata==8.5.0
 iniconfig==2.0.0
 itsdangerous==2.2.0

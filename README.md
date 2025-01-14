@@ -6,12 +6,17 @@
 
 ### Initialize the database:
 ```
-flask --app src init-db
+flask --app api init-db
 ```
 
 ### Run the API server:
+# Development (Not secure. Fine for local development.)
 ```
-flask --app src run --debug --port 5001
+python3 -m flask --app api run --debug --port 5001
+```
+# Production
+```
+  gunicorn -w 4 --bind 127.0.0.1:5001 'api.run_server:gunicorn_app'
 ```
 
 ### Package Installation

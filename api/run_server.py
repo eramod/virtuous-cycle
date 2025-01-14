@@ -1,6 +1,6 @@
-from src import create_app
+from api.app import create_app
 
-# QUESTION: Why did we create this file? Where is it being used?
+# See https://stackoverflow.com/questions/51395936/how-to-get-flask-app-running-with-gunicorn
 
 if __name__ == '__main__':
     create_app = create_app()
