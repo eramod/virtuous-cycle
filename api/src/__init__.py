@@ -8,9 +8,13 @@ import os
 from flask import Flask
 from flask_cors import CORS
 
+# TODO: Move create_app to app.py and import it into the __init__.py file.
+# QUESTION: Why don't I have a .venv folder in my project?
+
 # Application factory function. Any configuration, registration, and other setup
 # the application needs happen inside this function. It returns the app.
 def create_app(test_config=None):
+  # import pdb; pdb.set_trace()
   # Create and configure the app
   app = Flask(__name__, instance_relative_config=True)
   # Sets the Access-Control-Allow-Origin header that indicates the browser should permit loading resources from localhost:5173 during development. TODO: Point this to the deployed frontend in production.

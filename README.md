@@ -36,5 +36,10 @@ Within debugger:
 `c` or `continue`: Continue until you hit the next debugger
 `exit`: Exit the debugger
 
+### Deployment
+Created a procfile
+Using gunicorn (a WSGI server) - see https://flask.palletsprojects.com/en/stable/deploying/gunicorn/
+
+
 
 
