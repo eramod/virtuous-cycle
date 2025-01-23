@@ -24,6 +24,8 @@ python3 -m flask --app api run --debug --port 5001
   gunicorn -w 4 --bind 127.0.0.1:5001 'api.run_server:gunicorn_app'
 ```
 
+Heroku deployed URL: https://fierce-ocean-22944-dbcc3f05468e.herokuapp.com/
+
 ### Package Installation
 Python packages listed in requirements.txt
 
