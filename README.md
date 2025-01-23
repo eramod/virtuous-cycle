@@ -4,6 +4,11 @@
 
 ### Navigate to /api folder
 
+### Activate your virtual environment
+```
+pyenv activate virtuous_cycle_env
+```
+
 ### Initialize the database:
 ```
 flask --app api init-db
