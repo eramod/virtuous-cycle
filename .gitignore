@@ -26,10 +26,12 @@ dist-ssr
 # Python Cache and Compiled files
 __pycache__/
 *.py[cod]
+*.pyc
 *$py.class
 
 # Distribution / packaging
 .Python
+.pytest_cache/
 env/
 build/
 dist/
@@ -38,3 +40,5 @@ dist/
 *.pyd
 pip-log.txt
 pip-delete-this-directory.txt
+*.egg-info/
+instance/
