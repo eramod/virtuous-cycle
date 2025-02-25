@@ -57,9 +57,9 @@ def create_app(test_config=None):
   app.register_blueprint(auth.bp)
   app.register_blueprint(quote.bp)
 
-  db.init_app()
+  db.init_app(app)
 
-  # create_all creates the table schema in the database. it does not update them if they are not in the DB. You'll need a migration library for that. 
+  # TODO: Add a migration library. create_all creates the table schema in the database. it does not update them if they are not in the DB. You'll need a migration library for that.
   with app.app_context():
     db.create_all()
 

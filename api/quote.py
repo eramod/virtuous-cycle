@@ -2,9 +2,8 @@ from flask import (
   Blueprint, g, json, jsonify, make_response, request
 )
 from werkzeug.exceptions import abort
-
+from api.app import db
 from api.auth import login_required
-from api.db import get_db
 
 bp = Blueprint('quote', __name__, url_prefix='/api/quotes')
 
@@ -12,8 +11,6 @@ bp = Blueprint('quote', __name__, url_prefix='/api/quotes')
 @bp.route('/', methods=['GET'])
 @login_required
 def index():
-  db = get_db()
-
   # Fetch rows from the DB and build JSON data
   rows = db.execute(
     'SELECT q.id, content, attribution, created, author_id'
@@ -43,7 +40,6 @@ def create():
   if error is not None:
     return {'error': error}
   else:
-    db = get_db()
     db.execute(
       'INSERT INTO quote (content, attribution, author_id)'
       ' VALUES (?, ?, ?)',
@@ -78,7 +74,6 @@ def update(id):
   if error is not None:
     return { 'error': error }
   else:
-    db = get_db()
     db.execute(
       'UPDATE quote SET content = ?, attribution = ?'
       ' WHERE id = ?',
@@ -92,7 +87,6 @@ def update(id):
 @login_required
 def delete(id):
   quote = get_quote(id)
-  db = get_db()
   db.execute('DELETE FROM quote WHERE id = ?', (id,))
   db.commit()
   make_response(200, 'Quote successfully deleted')
@@ -102,7 +96,7 @@ def delete(id):
 # Fetch a quote from the database by id and check if the author matches the
 # logged in user.
 def get_quote(id, check_author=True):
-  quote = get_db().execute(
+  quote = db.execute(
     'SELECT q.id, content, attribution, created, author_id'
     ' FROM quote q JOIN user u ON q.author_id = u.id'
     ' WHERE q.id = ?',

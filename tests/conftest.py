@@ -26,7 +26,8 @@ def app():
   # with statement is called a context manager. Will return things to the clean state, regardless of whether the function failed or succeeded. This with is referring to the app context, and this is what gets cleaned up.
   with app.app_context():
     init_db()
-    get_db().executescript(_data_sql)
+    # TODO: Update to use SQL Alchemy
+    # get_db().executescript(_data_sql)
 
     yield app # QUESTION: What does this `yield` do? Does it identify this function as a generator?
     # Generators are memory-efficient because they only load the data needed to

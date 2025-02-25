@@ -1,14 +1,17 @@
 import functools
 
 from flask import (
-  Blueprint, abort, g, json, jsonify, make_response, request, session
+  Blueprint, abort, json, jsonify, make_response, request, session
 )
+
+from api.models import User
+
 """
 NOTE: werkzeug implements WSGI, the standard Python interface between
 applications and servers
 """
 from werkzeug.security import check_password_hash, generate_password_hash
-from api.db import get_db
+from api.app import db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -20,7 +23,7 @@ def register():
   phone_number = request.form['phone_number']
   password = request.form['password']
   confirm_password = request.form['confirm_password']
-  db = get_db()
+
   error = None
 
   # TODO: Use a serializer for validation / errors.
@@ -54,49 +57,47 @@ def register():
   else:
     return {'error': error}
 
-@bp.route('/login', methods=['POST'])
+@bp.route('/login', methods=['POST', 'GET'])
 def login():
-  email = request.form['email']
-  password = request.form['password']
-  db = get_db()
-  error = None
+
+  email=request.form["email"]
+  password=request.form["password"]
 
   if not email:
-    error = 'Email is required'
+    return jsonify({'message': 'Email is required'}), 400 # Bad Request
   elif not password:
-    error = 'Password is required'
+    return jsonify({'message': 'Password is required'}), 400
 
-  if error is None:
-    user = db.execute(
-      'SELECT * FROM user WHERE email = ?',
-      (email,)
-    ).fetchone()
+  user = db.session.execute(
+    db.select(
+      User
+    ).where(
+      User.email == email
+    )
+  ).scalar_one_or_none() # Replaced `first` because it returns a tuple
 
-    if user is None:
-      error = 'User not found'
-    elif not check_password_hash(user['password'], password):
-      error = 'Password is incorrect'
+  if user is None:
+    return jsonify({'message': 'User not found'}), 401 # Unauthorized
 
-    session.clear()
-    session['user_id'] = user['id']
+  if not check_password_hash(user.password_hash, password):
+    return jsonify({'message': 'Password is incorrect'}), 401
 
-    response = make_response(jsonify({'message': 'Login successful'}), 200)
-    return response
+  session.clear()
+  session['user_id'] = user['id']
 
-  else:
-    return jsonify({'message': 'Invalid username or password'}), 401
+  return make_response(jsonify({'message': 'Login successful'}), 200)
 
 # This `@bp.before_app_request` decorator registers a function that runs before
 # the view function, no matter what URL is requested in this blueprint
 @bp.before_app_request
 def load_logged_in_user():
+  # QUESTION: How do I get the current user from the db session? SQL Alchemy
   user_id = session.get('user_id')
-  db = get_db()
 
   if user_id is None:
-    g.user = None
+    user = None
   else:
-    g.user = db.execute(
+    user = db.execute(
       'SELECT * FROM user WHERE id = ?', (user_id,)
     ).fetchone()
 
@@ -108,7 +109,6 @@ def logout():
 @bp.route('/user', methods=['GET'])
 def user():
   user_id = session.get('user_id')
-  db = get_db()
 
   db_user = db.execute(
     'SELECT * FROM user WHERE id = ?', (user_id,)
@@ -136,7 +136,9 @@ def login_required(view):
   # applied to.
   @functools.wraps(view)
   def wrapped_view(**kwargs):
-    if g.user is None:
+    # TODO: This should refer to the current logged in user
+    user = None
+    if user is None:
       return abort(401, 'Unauthorized. User must be logged in to access this endpoint.')
     return view(**kwargs)
   return wrapped_view

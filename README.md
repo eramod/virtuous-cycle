@@ -9,11 +9,6 @@
 pyenv activate virtuous_cycle_env
 ```
 
-### Initialize the database:
-```
-flask --app api init-db
-```
-
 ### Run the API server:
 # Development (Not secure. Fine for local development.)
 ```

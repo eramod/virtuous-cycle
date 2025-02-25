@@ -6,7 +6,7 @@ CREATE TABLE user (
   email TEXT UNIQUE NOT NULL,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
-  phone_number INTEGER NOT NULL,
+  phone_number TEXT NOT NULL,
   password TEXT NOT NULL
 );
 
