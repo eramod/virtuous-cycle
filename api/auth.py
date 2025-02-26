@@ -1,7 +1,7 @@
 import functools
 
 from flask import (
-  Blueprint, abort, json, jsonify, make_response, request, session
+  Blueprint, abort, g, json, jsonify, make_response, redirect, request, session, url_for
 )
 
 from api.models import User
@@ -17,49 +17,42 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/register', methods=['POST'])
 def register():
-  email = request.form['email']
-  first_name = request.form['first_name']
-  last_name = request.form['last_name']
-  phone_number = request.form['phone_number']
-  password = request.form['password']
-  confirm_password = request.form['confirm_password']
+  data = request.get_json()
 
-  error = None
+  # Validate required fields
+  required_fields = ["email", "first_name", "last_name", "phone_number", "password", "confirm_password"]
+  missing_fields = [field for field in required_fields if not data.get(field)]
 
-  # TODO: Use a serializer for validation / errors.
-  # https://medium.com/@jesscsommer/how-to-serialize-and-validate-your-data-with-marshmallow-a815b2276a
-  if not email:
-    error = 'Email is required'
-  elif not first_name:
-    error = 'First Name is required'
-  elif not last_name:
-    error = 'Last Name is required'
-  elif not phone_number:
-    error = 'Phone number is required'
-  elif not password:
-    error = 'Password is required'
-  elif not confirm_password:
-    error = 'Confirm password is required'
-  elif password != confirm_password:
-    error = 'Passwords must match'
+  if missing_fields:
+    return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
 
-  if error is None:
-    try:
-      db.execute(
-        "INSERT INTO user (email, first_name, last_name, phone_number, password) VALUES (?,?,?,?,?)",
-        (email, first_name, last_name, phone_number, generate_password_hash(password, method="pbkdf2"))
-      )
-      db.commit()
-    except db.IntegrityError:
-      error = f"User {email} is already registered."
-    else:
-      return make_response('User successfully created', 200)
-  else:
-    return {'error': error}
+  # Validate that passwords match
+  if data["password"] != data["confirm_password"]:
+    return jsonify({'error': 'Passwords must match.'}), 400
+
+  # Check if user already exists
+  existing_user = db.session.query(User).filter_by(email=data["email"]).first()
+
+  if existing_user:
+    return jsonify({'error': 'User already registered.'}), 400
+
+  # Create new user
+  new_user = User(
+    email=data["email"],
+    first_name=data["first_name"],
+    last_name=data["last_name"],
+    phone_number=data["phone_number"],
+    password_hash=generate_password_hash(data["password"], method="pbkdf2:sha256"), # Hashes passwords securely. TODO: Use bcrypt instead?
+  )
+
+  # Save user to database
+  db.session.add(new_user)
+  db.session.commit()
+
+  return jsonify({'message': 'User successfully created'}), 201
 
 @bp.route('/login', methods=['POST', 'GET'])
 def login():
-
   email=request.form["email"]
   password=request.form["password"]
 
@@ -91,55 +84,57 @@ def login():
 # the view function, no matter what URL is requested in this blueprint
 @bp.before_app_request
 def load_logged_in_user():
-  # QUESTION: How do I get the current user from the db session? SQL Alchemy
+  #Load logged in user from the database if they exist
   user_id = session.get('user_id')
 
   if user_id is None:
-    user = None
+    g.user = None
   else:
-    user = db.execute(
-      'SELECT * FROM user WHERE id = ?', (user_id,)
-    ).fetchone()
+    g.user = db.session.get(User, user_id)
 
 @bp.route('/logout', methods=['POST'])
 def logout():
   session.clear()
-  return make_response(jsonify('User logged out'), 204)
+  g.pop('user', None)
+  return make_response(jsonify({'message': 'User logged out'}), 204)
 
 @bp.route('/user', methods=['GET'])
 def user():
   user_id = session.get('user_id')
 
-  db_user = db.execute(
-    'SELECT * FROM user WHERE id = ?', (user_id,)
-  ).fetchone()
+  # If there's no user_id in the session, return a 401 Unauthorized response.
+  if not user_id:
+    return jsonify({'error': 'Unauthorized. User must be logged in to access this endpoint.'}), 401
+
+  db_user = db.session.get(User, user_id)
 
   if db_user is None:
-    return make_response(jsonify('User not found'), 404)
-  else:
-    user = {
-      'id': db_user['id'],
-      'email': db_user['email'],
-      'first_name': db_user['first_name'],
-      'last_name': db_user['last_name'],
-      'phone_number': db_user['phone_number']
-    }
-    # TODO: This converts the user object to a JSON string. Do I need to do this?
-    json_data = json.dumps(user)
+    return jsonify({'message': 'User not found'}), 404
 
-    return jsonify(body={'user': json_data}, status=200, mimetype='application/json')
+  user_data = {
+    'id': db_user.id,
+    'email': db_user.email,
+    'first_name': db_user.first_name,
+    'last_name': db_user.last_name,
+    'phone_number': db_user.phone_number
+  }
+
+  return jsonify({'user': user_data}), 200
 
 
-# Decorator to be used for resources that require a user to be logged in for access.
+# Decorator for routes that require authentication
 def login_required(view):
   # This decorator returns a new view function that wraps the original view it’s
   # applied to.
   @functools.wraps(view)
   def wrapped_view(**kwargs):
-    # TODO: This should refer to the current logged in user
-    user = None
-    if user is None:
-      return abort(401, 'Unauthorized. User must be logged in to access this endpoint.')
+    if g.get('user') is None:
+      user_id = session.get('user_id')
+      if user_id:
+        g.user = db.session.get(User, user_id)
+    if g.user is None:
+      return jsonify({'error': 'Unauthorized. User must be logged in to access this endpoint.'}), 401
+
     return view(**kwargs)
   return wrapped_view
 
